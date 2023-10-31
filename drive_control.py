@@ -66,15 +66,6 @@ class DriveControl(StateMachine):
     def resetRotationController(self):
         self.profiledRotationController.reset(math.radians(self.gyro.getYawCCW()), self.gyro.getRadiansPerSecCCW())
 
-    def autoDrive(self):
-        self.engage()
-
-    def rotateSlowCCW(self):
-        self._vT = 0.1
-        self._vX = 0
-        self._vY = 0
-        self.engage(initial_state='robotOriented')
-        
     def holonomicDriveToWaypoint(self, waypoint:Pose2d):
         self._endPose = waypoint
         self.engage(initial_state='driveToWayPoint')
@@ -168,19 +159,7 @@ class DriveControl(StateMachine):
             self.swerveChassis.enableMinSpeed()
         self.swerveChassis.robotOrientedDrive(self._vX, self._vY, self._vT)
 
-    @state()
-    def driveToObject(self, initial_call):
-        if initial_call:
-            self.limelight.setGrabberPipeline(self._object)
-            self.swerveChassis.enableMinSpeed()
-            # self.hadTarget = False
-        velocities = (0,0,0)
-        if self.limelight.ta:
-            if self.limelight.ta > 4:
-                velocities = self.limelight.getVelocities()
-
-        self.swerveChassis.robotOrientedDrive(*velocities)
-
+   
     @state()
     def balanceOnChargingForward(self, initial_call):
         if initial_call:
@@ -250,42 +229,4 @@ class DriveControl(StateMachine):
         if initial_call:
             self.swerveChassis.lockChassis()
 
-    @state(first=True)
-    def driveToWayPoint(self, initial_call):
-        if initial_call:
-            self.swerveChassis.disableMinSpeed
-            # init the trajectory
-            self.logger.info(f"Initializing trajectory to {self._endPose}")
-            startPoint = self.createPathPoint(
-                self.swerveChassis.estimator.getEstimatedPosition()
-            )
-            ##TODO figure out how to calculate heading
-            endPoint = self.createPathPoint(self._endPose)
-            self.holonomic.initSimpleTrajectory(
-                startPoint,  # Starting position
-                endPoint,  # Ending position
-            )
-        self.logger.info(f"Holonomic atReference: {self.holonomic.atReference()}")
-        newSpeeds = self.holonomic.getChassisSpeeds(
-            self.swerveChassis.estimator.getEstimatedPosition()
-        )
-        self.logger.info(f'Speeds: {newSpeeds}')
-        self.swerveChassis.holonomicDrive(
-            newSpeeds
-        )
-
-    def createPathPoint(self, pose: Pose2d):
-        return PathPoint(pose.translation(), pose.rotation())
-
-    def setEndpoint(self, pose: Pose2d):
-        self._endPose = pose
-
-    def setVelocities(
-        self, vX: float, vY: float, vT: float, throttle: float = 1.0
-    ) -> None:
-        self._vX, self._vY, self._vT, self._throttle = (vX, vY, vT, throttle)
     
-    def done(self):
-        self._endPose = None
-        self._pathName = None
-        super().done()
