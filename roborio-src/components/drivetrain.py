@@ -177,7 +177,6 @@ class SwerveModule:
         location: Translation2d,
         driveMotorPID: TalonFXConfiguration
     ):
-        super().__init__()
         # set initial states for the component
         self.name = name
         self.drive = WPI_TalonFX(drive_motor_id)
@@ -232,10 +231,6 @@ class SwerveModule:
     def getSteerPosition(self):
         return self.steer.getSelectedSensorPosition(0)
 
-
-    # def getCommandedVelocity(self):
-    #     return self.calculated_velocity
-
     def getActualVelocity(self):
         return self.drive.getSelectedSensorVelocity()
 
@@ -253,9 +248,6 @@ class SwerveModule:
     def getCurrentSpeed(self) -> float:
         return self.drive_unit.velocityToSpeed(self.drive.getSelectedSensorVelocity())
 
-    # def getDrivePosition(self) -> float:
-    #     return self.drive.getSelectedSensorPosition()
-
     # TODO: see TODO on getCurrentRotation()
     def getCurrentState(self):
         return SwerveModuleState(
@@ -271,9 +263,6 @@ class SwerveModule:
     def getSteerPosition(self):
         return self.steer.getSelectedSensorPosition(0)
 
-    # def resetRemoteEncoder(self):
-    #     self.encoder.setPositionToAbsolute()
-
     def configModuleComponents(self):
         # configure CANCoder
         # No worky: self.encoder.configAllSettings(cfgSteerEncoder)
@@ -287,7 +276,6 @@ class SwerveModule:
             SensorInitializationStrategy.BootToAbsolutePosition
         )
         # set position to Absolute
-
         self.steer.configAllSettings(config.cfgSteerMotor)
         self.steer.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 250)
         self.steer.setInverted(TalonFXInvertType.CounterClockwise)  # was Clockwise
@@ -315,11 +303,6 @@ class SwerveModule:
         self.drive.configVoltageCompSaturation(config.VOLTAGE_COMPENSATION)
         self.drive.enableVoltageCompensation(True)
         self.drive.setNeutralMode(NeutralMode.Brake)
-
-       # SmartDashboard.putNumber("Drive kF", config.cfgDriveMotor.slot0.kF)
-
-        # self.current_states = None
-        # self.current_speeds = None
 
     def enableMinSpeed(self):
         self.useMinSpeed = True
@@ -440,10 +423,6 @@ class SwerveChassis:
         )
         self.trajectoryConfig.setKinematics(self.kinematics)
 
-        #self.holonomicController = FROGHolonomic(self.kinematics)
-        # self.holonomicController = PPHolonomic(self.kinematics)
-        # self.holonomicController.logger = self.logger
-
         self.gyro.resetGyro()
 
         self.chassisSpeeds = ChassisSpeeds(0, 0, 0)
@@ -494,48 +473,6 @@ class SwerveChassis:
             tuple(self.getModulePositions()),
             pose,
         )
-        # self.odometry.resetPosition(
-        #     self.gyro.getRotation2d(),
-        #     self.starting_pose,
-        #     *self.getModulePositions()
-        # )
-
-
-    # def getSimpleTrajectory(self):
-    #     self.startTrajectoryPose = self.estimator.getEstimatedPosition()
-    #     self.endTrajectoryPose = self.startTrajectoryPose + Transform2d(
-    #         feetToMeters(6), feetToMeters(3), 0
-    #     )
-    #     self.logger.info(
-    #         "Auto Drive - Start Pose: %s\n End Pose:%s",
-    #         self.startTrajectoryPose,
-    #         self.endTrajectoryPose,
-    #     )
-    #     return TrajectoryGenerator.generateTrajectory(
-    #         self.startTrajectoryPose,  # Starting position
-    #         [],  # Pass through these points
-    #         self.endTrajectoryPose,  # Ending position
-    #         self.trajectoryConfig,
-    #     )
-
-    # def getSwerveCommand(self):
-    #     self.xController = PIDController(1, 0, 0)
-    #     self.yController = PIDController(1, 0, 0)
-    #     self.angleController = ProfiledPIDControllerRadians(
-    #         1, 0, 0, TrapezoidProfileRadians.Constraints(math.pi, math.pi)
-    #     )
-    #     self.angleController.enableContinuousInput(-1 * math.pi, math.pi)
-    #     self.holonomicController = HolonomicDriveController(
-    #         self.xController, self.yController, self.angleController
-    #     )
-    #     return Swerve4ControllerCommand(
-    #         self.getSimpleTrajectory(),
-    #         self.estimator.getEstimatedPosition,  # CALLABLE getPose
-    #         self.kinematics,
-    #         self.holonomicController,
-    #         self.setModuleStates,
-    #         [self],
-    #     )
 
     def getModuleStates(self):
         return [module.getCurrentState() for module in self.modules]
@@ -565,28 +502,11 @@ class SwerveChassis:
         return math.atan2( self.chassisSpeeds.vy, self.chassisSpeeds.vx )
 
     def holonomicDrive(self, chassisSpeeds) -> None:
-        # TODO: Remove this call once we have tuned the drivetrain
-        #       It allows us to adjust PID values on the fly.
-        #self.holonomicController.loadPID()
-        """Sets ChassisSpeeds from return of the holonomic controller."""
-        # self.chassisSpeeds = self.holonomicController.getChassisSpeeds(
-        #     self.estimator.getEstimatedPosition()
-        # )
         self.chassisSpeeds = chassisSpeeds
 
     def robotOrientedDrive(self, vX, vY, vT):
         self.logger.info(f'Velocities: {vX}, {vY}, {vT}')
         self.chassisSpeeds = ChassisSpeeds(vX, vY, vT)
-
-    # def driveToObject(self):
-    #     if self.limelight.hasGrabberTarget():
-    #         self.robotOrientedDrive(
-    #             self.limelight.drive_vX,
-    #             self.limelight.drive_vY,
-    #             self.limelight.drive_vRotate
-    #         )
-    #     else:
-    #         self.robotOrientedDrive(0,0,0)
 
     def execute(self):
         if self.enabled:
@@ -603,31 +523,12 @@ class SwerveChassis:
         )
         visionPose, visionTime = self.limelight.getBotPoseEstimateForAlliance()
         if visionPose:
-            # SmartDashboard.putNumber(
-            #     "Vision_X", visionPose.X()
-            # )
-            # SmartDashboard.putNumber(
-            #     "Vision_Y", visionPose.Y()
-            # )
-            # SmartDashboard.putNumber(
-            #     "Vision_Z", visionPose.Z()
-            # )
-            # SmartDashboard.putNumber(
-            #     "Vision_T", visionPose.rotation().toRotation2d().degrees()
-            # )
             if (
                 abs(visionPose.x - self.estimatorPose.x) < 0.5
                 and abs(visionPose.y - self.estimatorPose.y) < 0.5
             ):
                 stddevupdate = remap(visionPose.x,2.0, 8.0, 0.3, 2.0)
-                # self.logger.info(f'Adding vision measuerment with StdDev of {stddevupdate} and distance of {visionPose.x} ')
-                self.estimator.addVisionMeasurement(visionPose.toPose2d(), visionTime, (stddevupdate, stddevupdate, math.pi/2))
-
-
-        # SmartDashboard.putNumber(
-        #     "Estimator_X", self.estimatorPose.X())
-        # SmartDashboard.putNumber(
-        #     "Estimator_Y", self.estimatorPose.Y())
-        # SmartDashboard.putNumber(
-        #     "Estimator_T", self.estimatorPose.rotation().degrees()
-        # )
+                self.estimator.addVisionMeasurement(
+                    visionPose.toPose2d(), visionTime,
+                    (stddevupdate, stddevupdate, math.pi/2)
+                )
