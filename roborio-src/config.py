@@ -56,13 +56,13 @@ blDriveMotorPID.slot0.kI = 0.0
 blDriveMotorPID.slot0.kD = 0.0
 blDriveMotorPID.slot0.kF = 0.0439
 
-self.driveMotorPID = TalonFXConfiguration()
-self.driveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-self.driveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-self.driveMotorPID.slot0.kP = 0.0
-self.driveMotorPID.slot0.kI = 0.0
-self.driveMotorPID.slot0.kD = 0.0
-self.driveMotorPID.slot0.kF = 0.0438
+brDriveMotorPID = TalonFXConfiguration()
+brDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
+brDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+brDriveMotorPID.slot0.kP = 0.0
+brDriveMotorPID.slot0.kI = 0.0
+brDriveMotorPID.slot0.kD = 0.0
+brDriveMotorPID.slot0.kF = 0.0438
 
 class SwerveModuleConfig:
     def __init__(self,
@@ -144,7 +144,7 @@ MODULE_BACK_RIGHT = {
     "steer_sensor_id": 34,
     "steer_sensor_offset": 46.230,
     "location": Translation2d.fromFeet(-WHEELBASE / 2, -TRACK_WIDTH / 2),
-    "driveMotorPID": self.driveMotorPID
+    "driveMotorPID": brDriveMotorPID
 }
 
 MAX_TRAJECTORY_SPEED = 3
