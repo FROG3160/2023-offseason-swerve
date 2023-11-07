@@ -56,13 +56,58 @@ blDriveMotorPID.slot0.kI = 0.0
 blDriveMotorPID.slot0.kD = 0.0
 blDriveMotorPID.slot0.kF = 0.0439
 
-brDriveMotorPID = TalonFXConfiguration()
-brDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-brDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-brDriveMotorPID.slot0.kP = 0.0
-brDriveMotorPID.slot0.kI = 0.0
-brDriveMotorPID.slot0.kD = 0.0
-brDriveMotorPID.slot0.kF = 0.0438
+self.driveMotorPID = TalonFXConfiguration()
+self.driveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
+self.driveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+self.driveMotorPID.slot0.kP = 0.0
+self.driveMotorPID.slot0.kI = 0.0
+self.driveMotorPID.slot0.kD = 0.0
+self.driveMotorPID.slot0.kF = 0.0438
+
+class SwerveModuleConfig:
+    def __init__(self,
+                 name: str,
+                 drive_motor_id: int,
+                 steer_motor_id: int,
+                 steer_sensor_id: int,
+                 steer_sensor_offset: float,
+                 location_x: float,
+                 location_y: float,
+                 drive_p: float,
+                 drive_i: float,
+                 drive_d: float,
+                 drive_f: float):
+        
+        self.name = name
+        self.drive_motor_id = drive_motor_id
+        self.steer_motor_id = steer_motor_id
+        self.steer_sensor_id = steer_sensor_id
+        self.steer_sensor_offset = steer_sensor_offset
+        self.location = Translation2d.fromFeet(location_x, location_y)
+        self.driveMotorPID = TalonFXConfiguration()
+        self.driveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
+        self.driveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+        self.driveMotorPID.slot0.kP = drive_p
+        self.driveMotorPID.slot0.kI = drive_i
+        self.driveMotorPID.slot0.kD = drive_d
+        self.driveMotorPID.slot0.kF = drive_f
+
+    def __repr__(self):
+        return(f'{self.name}:, {self.location}')
+
+MODULE_FRONT_LEFT = SwerveModuleConfig(
+    'FrontLeft',
+    11,
+    21,
+    31,
+    -5.625,
+    WHEELBASE / 2,
+    TRACK_WIDTH / 2,
+    0,
+    0,
+    0,
+    0.0455
+    )
 
 MODULE_FRONT_LEFT = {
     "name": "FrontLeft",
@@ -86,8 +131,8 @@ MODULE_FRONT_RIGHT = {
 MODULE_BACK_LEFT = {
     "name": "BackLeft",
     "drive_motor_id": 13,
-    "steer_motor_id": 23,
     "steer_sensor_id": 33,
+    "steer_motor_id": 23,
     "steer_sensor_offset": 179.825,
     "location": Translation2d.fromFeet(-WHEELBASE / 2, TRACK_WIDTH / 2),
     "driveMotorPID": blDriveMotorPID
@@ -99,7 +144,7 @@ MODULE_BACK_RIGHT = {
     "steer_sensor_id": 34,
     "steer_sensor_offset": 46.230,
     "location": Translation2d.fromFeet(-WHEELBASE / 2, -TRACK_WIDTH / 2),
-    "driveMotorPID": brDriveMotorPID
+    "driveMotorPID": self.driveMotorPID
 }
 
 MAX_TRAJECTORY_SPEED = 3
