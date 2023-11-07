@@ -5,7 +5,7 @@ from wpimath.controller import (
     ProfiledPIDControllerRadians,
     HolonomicDriveController,
 )
-from utils.utils import remap
+from ..utils import remap
 import wpimath
 from wpimath.units import feetToMeters
 from wpimath.trajectory import (
