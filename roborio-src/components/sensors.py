@@ -1,7 +1,7 @@
 import wpilib
 from navx import AHRS
 from ctre import CANifier
-from utils.utils import Buffer
+from ..utils import Buffer
 from rev import ColorSensorV3
 import math
 from wpimath.geometry import Rotation2d

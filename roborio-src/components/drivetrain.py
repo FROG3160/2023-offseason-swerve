@@ -11,7 +11,7 @@ from ctre import (AbsoluteSensorRange, ControlMode, FeedbackDevice,
                   SensorInitializationStrategy, StatusFrameEnhanced,
                   TalonFXInvertType, WPI_CANCoder, WPI_TalonFX, TalonFXConfiguration)
 from magicbot import feedback
-from utils.utils import DriveUnit, remap
+from ..utils import DriveUnit, remap
 from wpilib import Field2d, SmartDashboard
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Pose2d, Rotation2d, Transform2d, Translation2d
