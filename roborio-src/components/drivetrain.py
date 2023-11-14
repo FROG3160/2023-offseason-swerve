@@ -10,6 +10,7 @@ from ctre import (AbsoluteSensorRange, ControlMode, FeedbackDevice,
                   NeutralMode, RemoteSensorSource,
                   SensorInitializationStrategy, StatusFrameEnhanced,
                   TalonFXInvertType, WPI_CANCoder, WPI_TalonFX, TalonFXConfiguration)
+from phoenix6.hardware.talon_fx import TalonFX
 from magicbot import feedback
 from ..utils import DriveUnit, remap
 from wpilib import Field2d, SmartDashboard

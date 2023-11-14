@@ -1,7 +1,6 @@
 from magicbot import state, default_state, tunable
 from magicbot.state_machine import StateMachine
 from components.drivetrain import SwerveChassis
-from pathplannerlib import PathPoint
 from wpimath.controller import ProfiledPIDControllerRadians
 from wpimath.geometry import Pose2d
 from wpimath.trajectory import TrapezoidProfileRadians
