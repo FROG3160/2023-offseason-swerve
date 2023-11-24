@@ -6,10 +6,7 @@ from components.controllers import PPHolonomic
 from components.field import FROGFieldLayout
 from components.sensors import FROGGyro
 from components.vision import FROGLimeLightVision
-from ctre import (AbsoluteSensorRange, ControlMode, FeedbackDevice,
-                  NeutralMode, RemoteSensorSource,
-                  SensorInitializationStrategy, StatusFrameEnhanced,
-                  TalonFXInvertType, WPI_CANCoder, WPI_TalonFX, TalonFXConfiguration)
+from phoenix6 import TalonFX, CANcoder
 from magicbot import feedback
 from ..utils import DriveUnit, remap
 from wpilib import Field2d, SmartDashboard
@@ -179,9 +176,9 @@ class SwerveModule:
     ):
         # set initial states for the component
         self.name = name
-        self.drive = WPI_TalonFX(drive_motor_id)
-        self.steer = WPI_TalonFX(steer_motor_id)
-        self.encoder = WPI_CANCoder(steer_sensor_id)
+        self.drive = TalonFX(drive_motor_id)
+        self.steer = TalonFX(steer_motor_id)
+        self.encoder = CANcoder(steer_sensor_id)
         self.steerOffset = steer_sensor_offset
         self.location = location
         self.driveMotorPID = driveMotorPID
