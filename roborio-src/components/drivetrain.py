@@ -7,7 +7,9 @@ from components.field import FROGFieldLayout
 from components.sensors import FROGGyro
 from components.vision import FROGLimeLightVision
 from phoenix6 import (TalonFX, CANcoder, TalonFXConfiguration,
+                      CANcoderConfiguration,
                       PositionDutyCycle, VelocityDutyCycle)
+from phoenix6.configs.cancoder_configs import AbsoluteSensorRangeValue, SensorDirectionValue
 from magicbot import feedback
 from ..utils import DriveUnit, remap
 from wpilib import Field2d, SmartDashboard
@@ -263,17 +265,16 @@ class SwerveModule:
 
     def configModuleComponents(self):
         # configure CANCoder
-        # No worky: self.encoder.configAllSettings(cfgSteerEncoder)
-        # TODO: ^^ see if we can use the configAllSettings method again
-        # TODO:  Review all other config settings for the devices
-        self.encoder.configAbsoluteSensorRange(AbsoluteSensorRange.Signed_PlusMinus180)
-        self.encoder.configSensorDirection(False)
-        # adjust 0 degree point with offset
-        self.encoder.configMagnetOffset(self.steerOffset)
-        self.encoder.configSensorInitializationStrategy(
-            SensorInitializationStrategy.BootToAbsolutePosition
-        )
-        # set position to Absolute
+        cancoder_config = CANcoderConfiguration()
+        cancoder_config.magnet_sensor.absolute_sensor_range = AbsoluteSensorRangeValue.SIGNED_PLUS_MINUS_HALF
+        cancoder_config.magnet_sensor.magnet_offset = self.steerOffset
+        cancoder_config.magnet_sensor.sensor_direction(SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE)
+        self.encoder.configurator.apply(cancoder_config)
+        # TODO:  See if we can, or need to set initialization strategy for the CANCoder
+        # self.encoder.configSensorInitializationStrategy(
+        #     SensorInitializationStrategy.BootToAbsolutePosition
+        # )
+
         self.steer.configAllSettings(config.cfgSteerMotor)
         self.steer.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General, 250)
         self.steer.setInverted(TalonFXInvertType.CounterClockwise)  # was Clockwise
