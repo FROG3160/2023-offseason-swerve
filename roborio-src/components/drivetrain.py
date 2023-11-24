@@ -6,7 +6,8 @@ from components.controllers import PPHolonomic
 from components.field import FROGFieldLayout
 from components.sensors import FROGGyro
 from components.vision import FROGLimeLightVision
-from phoenix6 import TalonFX, CANcoder
+from phoenix6 import (TalonFX, CANcoder, TalonFXConfiguration,
+                      PositionDutyCycle, VelocityDutyCycle)
 from magicbot import feedback
 from ..utils import DriveUnit, remap
 from wpilib import Field2d, SmartDashboard
@@ -20,8 +21,8 @@ from wpimath.units import feetToMeters, metersToInches
 from .sensors import FROGGyro
 
 # Motor Control modes
-VELOCITY_MODE = ControlMode.Velocity
-POSITION_MODE = ControlMode.Position
+VELOCITY_MODE = VelocityDutyCycle
+POSITION_MODE = PositionDutyCycle
 
 MAX_TRAJECTORY_SPEED = feetToMeters(5)
 MAX_TRAJECTORY_ACCEL = feetToMeters(5)
