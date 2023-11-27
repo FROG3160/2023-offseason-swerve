@@ -11,6 +11,11 @@ from ctre import (
     CANCoderConfiguration,
     AbsoluteSensorRange,
 )
+from phoenix6 import (TalonFX, CANcoder, TalonFXConfiguration,
+                      CANcoderConfiguration,
+                      PositionDutyCycle, VelocityDutyCycle)
+from phoenix6.configs.cancoder_configs import AbsoluteSensorRangeValue, SensorDirectionValue
+from phoenix6.configs.talon_fx_configs import FeedbackSensorSourceValue
 
 TRACK_WIDTH = 20 / 12
 WHEELBASE = 20 / 12
@@ -29,40 +34,108 @@ MAX_CHASSIS_RADIANS_SEC = MAX_CHASSIS_REV_SEC * math.tau
 MODULE_DRIVE_GEARING = [(14.0 / 50.0), (28.0 / 16.0), (15.0 / 45.0)]  # Mk4 L3
 MODULE_WHEEL_DIAMETER = 0.1000125  # 3 15/16 inches in meters
 
+class FROGMotorConfig(TalonFXConfiguration):
+    def __init__(self, feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+                 feedback_remote_sensor_id=None, k_p=0, k_i=0, k_d=0, k_v=0):
+        super.__init__()
+        self.feedback.feedback_sensor_source = feedback_sensor_source
+        self.feedback.feedback_remote_sensor_id = feedback_remote_sensor_id
+        self.slot0.k_p = k_p
+        self.slot0.k_i = k_i
+        self.slot0.k_d = k_d
+        self.slot0.k_v = k_v
+
+class FROGTalonFXMotor(TalonFX):
+    def __init__(self, id=None, feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+                 feedback_remote_sensor_id=None, k_p=0, k_i=0, k_d=0, k_v=0):
+        super.__init__(device_id=id)
+        self.config = TalonFXConfiguration()
+        self.config.feedback.feedback_sensor_source = feedback_sensor_source
+        self.config.feedback.feedback_remote_sensor_id = feedback_remote_sensor_id
+        self.config.slot0.k_p = k_p
+        self.config.slot0.k_i = k_i
+        self.config.slot0.k_d = k_d
+        self.config.slot0.k_v = k_v
+        self.configurator.apply(self.config)
+        
 #
 # **Swerve Module Drive Motor Config
 #
-frDriveMotorPID = TalonFXConfiguration()
-frDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-frDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-frDriveMotorPID.slot0.kP = 0.0
-frDriveMotorPID.slot0.kI = 0.0
-frDriveMotorPID.slot0.kD = 0.0
-frDriveMotorPID.slot0.kF = 0.04425
+# frDriveMotorPID = TalonFXConfiguration()
+# frDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
+# frDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+# frDriveMotorPID.slot0.kP = 0.0
+# frDriveMotorPID.slot0.kI = 0.0
+# frDriveMotorPID.slot0.kD = 0.0
+# frDriveMotorPID.slot0.kF = 0.04425
 
-flDriveMotorPID = TalonFXConfiguration()
-flDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-flDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-flDriveMotorPID.slot0.kP = 0.0
-flDriveMotorPID.slot0.kI = 0.0
-flDriveMotorPID.slot0.kD = 0.0
-flDriveMotorPID.slot0.kF = 0.0455
+frDriveMotorConfig = FROGMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+    k_v = 0.04425
 
-blDriveMotorPID = TalonFXConfiguration()
-blDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-blDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-blDriveMotorPID.slot0.kP = 0.0
-blDriveMotorPID.slot0.kI = 0.0
-blDriveMotorPID.slot0.kD = 0.0
-blDriveMotorPID.slot0.kF = 0.0439
+)
+frDriveMotor = FROGTalonFXMotor(
+    id=21,
+    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+    k_v = 0.04425
+)
+frDriveMotor.set_control()
+# flDriveMotorPID = TalonFXConfiguration()
+# flDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
+# flDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+# flDriveMotorPID.slot0.kP = 0.0
+# flDriveMotorPID.slot0.kI = 0.0
+# flDriveMotorPID.slot0.kD = 0.0
+# flDriveMotorPID.slot0.kF = 0.0455
 
-brDriveMotorPID = TalonFXConfiguration()
-brDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-brDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-brDriveMotorPID.slot0.kP = 0.0
-brDriveMotorPID.slot0.kI = 0.0
-brDriveMotorPID.slot0.kD = 0.0
-brDriveMotorPID.slot0.kF = 0.0438
+flDriveMotorConfig = FROGMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+    k_v = 0.0455
+
+)
+
+# blDriveMotorPID = TalonFXConfiguration()
+# blDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
+# blDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+# blDriveMotorPID.slot0.kP = 0.0
+# blDriveMotorPID.slot0.kI = 0.0
+# blDriveMotorPID.slot0.kD = 0.0
+# blDriveMotorPID.slot0.kF = 0.0439
+
+blDriveMotorConfig = FROGMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+    k_v = 0.0439
+
+)
+
+# brDriveMotorPID = TalonFXConfiguration()
+# brDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
+# brDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+# brDriveMotorPID.slot0.kP = 0.0
+# brDriveMotorPID.slot0.kI = 0.0
+# brDriveMotorPID.slot0.kD = 0.0
+# brDriveMotorPID.slot0.kF = 0.0438
+
+brDriveMotorConfig = FROGMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+    k_v = 0.0438
+
+)
+
+class SwerveSteerEncoderConfig(CANcoderConfiguration):
+    def __init__(self, steer_offset):
+        super.__init__()
+        self.magnet_sensor
+        self.magnet_sensor.absolute_sensor_range = AbsoluteSensorRangeValue.SIGNED_PLUS_MINUS_HALF
+        self.magnet_sensor.magnet_offset = steer_offset
+        self.magnet_sensor.sensor_direction(SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE)
+
+
+
+class SwerveSteerMotorConfig(TalonFXConfiguration):
+    def __init__(self):
+        super.__init__()
+
 
 class SwerveModuleConfig:
     def __init__(self,
@@ -73,10 +146,10 @@ class SwerveModuleConfig:
                  steer_sensor_offset: float,
                  location_x: float,
                  location_y: float,
-                 drive_p: float,
-                 drive_i: float,
-                 drive_d: float,
-                 drive_f: float):
+                 drive_p: float = 0,
+                 drive_i: float = 0,
+                 drive_d: float = 0,
+                 drive_v: float = 0): #used to be kF (feed-forward)
         
         self.name = name
         self.drive_motor_id = drive_motor_id
@@ -84,13 +157,13 @@ class SwerveModuleConfig:
         self.steer_sensor_id = steer_sensor_id
         self.steer_sensor_offset = steer_sensor_offset
         self.location = Translation2d.fromFeet(location_x, location_y)
-        self.driveMotorPID = TalonFXConfiguration()
-        self.driveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-        self.driveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-        self.driveMotorPID.slot0.kP = drive_p
-        self.driveMotorPID.slot0.kI = drive_i
-        self.driveMotorPID.slot0.kD = drive_d
-        self.driveMotorPID.slot0.kF = drive_f
+        self.drive_motor_config = TalonFXConfiguration()
+        # self.drive_motor_config.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
+        self.drive_motor_config.feedback.feedback_sensor_source(FeedbackSensorSourceValue.ROTOR_SENSOR)
+        self.drive_motor_config.slot0.k_p = drive_p
+        self.drive_motor_config.slot0.k_i = drive_i
+        self.drive_motor_config.slot0.k_d = drive_d
+        self.drive_motor_config.slot0.k_v = drive_v
 
     def __repr__(self):
         return(f'{self.name}:, {self.location}')
@@ -116,7 +189,7 @@ MODULE_FRONT_LEFT = {
     "steer_sensor_id": 31,
     "steer_sensor_offset": -5.625,
     "location": Translation2d.fromFeet(WHEELBASE / 2, TRACK_WIDTH / 2),
-    "driveMotorPID": flDriveMotorPID
+    .drive_motor_config": flDriveMotorPID
 }
 
 MODULE_FRONT_RIGHT = {
@@ -126,7 +199,7 @@ MODULE_FRONT_RIGHT = {
     "steer_sensor_id": 32,
     "steer_sensor_offset": -150.293,
     "location": Translation2d.fromFeet(WHEELBASE / 2, -TRACK_WIDTH / 2),
-    "driveMotorPID": frDriveMotorPID
+    .drive_motor_config": frDriveMotorPID
 }
 MODULE_BACK_LEFT = {
     "name": "BackLeft",
@@ -135,7 +208,7 @@ MODULE_BACK_LEFT = {
     "steer_motor_id": 23,
     "steer_sensor_offset": 179.825,
     "location": Translation2d.fromFeet(-WHEELBASE / 2, TRACK_WIDTH / 2),
-    "driveMotorPID": blDriveMotorPID
+    .drive_motor_config": blDriveMotorPID
 }
 MODULE_BACK_RIGHT = {
     "name": "BackRight",
@@ -144,7 +217,7 @@ MODULE_BACK_RIGHT = {
     "steer_sensor_id": 34,
     "steer_sensor_offset": 46.230,
     "location": Translation2d.fromFeet(-WHEELBASE / 2, -TRACK_WIDTH / 2),
-    "driveMotorPID": brDriveMotorPID
+    .drive_motor_config": brDriveMotorPID
 }
 
 MAX_TRAJECTORY_SPEED = 3
