@@ -34,7 +34,7 @@ MAX_CHASSIS_RADIANS_SEC = MAX_CHASSIS_REV_SEC * math.tau
 MODULE_DRIVE_GEARING = [(14.0 / 50.0), (28.0 / 16.0), (15.0 / 45.0)]  # Mk4 L3
 MODULE_WHEEL_DIAMETER = 0.1000125  # 3 15/16 inches in meters
 
-#TODO
+
 class FROGFXMotorConfig(TalonFXConfiguration):
     def __init__(self, feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
                  feedback_remote_sensor_id=None, k_p=0, k_i=0, k_d=0, k_v=0):
@@ -45,7 +45,7 @@ class FROGFXMotorConfig(TalonFXConfiguration):
         self.slot0.k_i = k_i
         self.slot0.k_d = k_d
         self.slot0.k_v = k_v
-        #TODO #33
+        #TODO Research and test setting allowableClosedloopError for phoenix6 Library #33
         # self.allowableClosedloopError
 
 class FROGFXMotor(TalonFX):
