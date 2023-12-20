@@ -34,7 +34,8 @@ MAX_CHASSIS_RADIANS_SEC = MAX_CHASSIS_REV_SEC * math.tau
 MODULE_DRIVE_GEARING = [(14.0 / 50.0), (28.0 / 16.0), (15.0 / 45.0)]  # Mk4 L3
 MODULE_WHEEL_DIAMETER = 0.1000125  # 3 15/16 inches in meters
 
-class FROGMotorConfig(TalonFXConfiguration):
+#TODO
+class FROGFXMotorConfig(TalonFXConfiguration):
     def __init__(self, feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
                  feedback_remote_sensor_id=None, k_p=0, k_i=0, k_d=0, k_v=0):
         super.__init__()
@@ -44,83 +45,84 @@ class FROGMotorConfig(TalonFXConfiguration):
         self.slot0.k_i = k_i
         self.slot0.k_d = k_d
         self.slot0.k_v = k_v
+        #TODO #33
+        # self.allowableClosedloopError
 
-class FROGTalonFXMotor(TalonFX):
-    def __init__(self, id=None, feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
-                 feedback_remote_sensor_id=None, k_p=0, k_i=0, k_d=0, k_v=0):
+class FROGFXMotor(TalonFX):
+    def __init__(self, id=None, motor_config=FROGFXMotorConfig()):
         super.__init__(device_id=id)
-        self.config = TalonFXConfiguration()
-        self.config.feedback.feedback_sensor_source = feedback_sensor_source
-        self.config.feedback.feedback_remote_sensor_id = feedback_remote_sensor_id
-        self.config.slot0.k_p = k_p
-        self.config.slot0.k_i = k_i
-        self.config.slot0.k_d = k_d
-        self.config.slot0.k_v = k_v
+        self.config = motor_config
         self.configurator.apply(self.config)
         
 #
 # **Swerve Module Drive Motor Config
 #
-# frDriveMotorPID = TalonFXConfiguration()
-# frDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-# frDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-# frDriveMotorPID.slot0.kP = 0.0
-# frDriveMotorPID.slot0.kI = 0.0
-# frDriveMotorPID.slot0.kD = 0.0
-# frDriveMotorPID.slot0.kF = 0.04425
-
-frDriveMotorConfig = FROGMotorConfig(
-    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
-    k_v = 0.04425
-
-)
-frDriveMotor = FROGTalonFXMotor(
-    id=21,
-    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
-    k_v = 0.04425
-)
-frDriveMotor.set_control()
-# flDriveMotorPID = TalonFXConfiguration()
-# flDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-# flDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-# flDriveMotorPID.slot0.kP = 0.0
-# flDriveMotorPID.slot0.kI = 0.0
-# flDriveMotorPID.slot0.kD = 0.0
-# flDriveMotorPID.slot0.kF = 0.0455
-
-flDriveMotorConfig = FROGMotorConfig(
+flDriveMotorConfig = FROGFXMotorConfig(
     feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
     k_v = 0.0455
-
 )
-
-# blDriveMotorPID = TalonFXConfiguration()
-# blDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-# blDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-# blDriveMotorPID.slot0.kP = 0.0
-# blDriveMotorPID.slot0.kI = 0.0
-# blDriveMotorPID.slot0.kD = 0.0
-# blDriveMotorPID.slot0.kF = 0.0439
-
-blDriveMotorConfig = FROGMotorConfig(
+frDriveMotorConfig = FROGFXMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
+    k_v = 0.04425
+)
+blDriveMotorConfig = FROGFXMotorConfig(
     feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
     k_v = 0.0439
-
 )
-
-# brDriveMotorPID = TalonFXConfiguration()
-# brDriveMotorPID.initializationStrategy = SensorInitializationStrategy.BootToZero
-# brDriveMotorPID.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.IntegratedSensor)
-# brDriveMotorPID.slot0.kP = 0.0
-# brDriveMotorPID.slot0.kI = 0.0
-# brDriveMotorPID.slot0.kD = 0.0
-# brDriveMotorPID.slot0.kF = 0.0438
-
-brDriveMotorConfig = FROGMotorConfig(
+brDriveMotorConfig = FROGFXMotorConfig(
     feedback_sensor_source=FeedbackSensorSourceValue.ROTOR_SENSOR,
     k_v = 0.0438
-
 )
+
+#
+# **Swerve Module Steer Motor Config
+#
+frSteerMotorConfig = FROGFXMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
+    feedback_remote_sensor_id=31
+    k_p=1.2,
+    k_i=0.0001
+)
+flSteerMotorConfig = FROGFXMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
+    feedback_remote_sensor_id=32
+    k_p=1.2,
+    k_i=0.0001
+)
+blSteerMotorConfig = FROGFXMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
+    feedback_remote_sensor_id=33
+    k_p=1.2,
+    k_i=0.0001
+)
+brSteerMotorConfig = FROGFXMotorConfig(
+    feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
+    feedback_remote_sensor_id=34
+    k_p=1.2,
+    k_i=0.0001
+)
+
+# **Swerve Module Drive Motors
+flDriveMotor = FROGFXMotor(
+    id=21,
+    motor_config=flDriveMotorConfig
+)
+frDriveMotor = FROGFXMotor(
+    id=22,
+    motor_config=frDriveMotorConfig
+)
+blDriveMotor = FROGFXMotor(
+    id=23,
+    motor_config=frDriveMotorConfig
+)
+brDriveMotor = FROGFXMotor(
+    id=24,
+    motor_config=frDriveMotorConfig
+)
+
+# **Swerve Module Steer Motors
+
+
 
 class SwerveSteerEncoderConfig(CANcoderConfiguration):
     def __init__(self, steer_offset):
@@ -227,18 +229,6 @@ ppYPIDController = PIDController(1,0,0)
 ppRotationPIDController = PIDController(1,0,0)
 ppTolerance = Pose2d(0.03, 0.03, Rotation2d.fromDegrees(2))
 
-#
-# **Swerve Module Steer Motor Config
-#
-cfgSteerMotor = TalonFXConfiguration()
-cfgSteerMotor.primaryPID = BaseTalonPIDSetConfiguration(FeedbackDevice.RemoteSensor0)
-cfgSteerMotor.slot0.kP = 1.2  # TODO: Confirm PID
-cfgSteerMotor.slot0.kI = 0.0001
-cfgSteerMotor.slot0.kD = 0.0
-cfgSteerMotor.slot0.kF = 0.0
-""" TODO: test if we can remove this.  The current value amounts to
-  about .44 degrees allowed error. """
-cfgSteerMotor.slot0.allowableClosedloopError = 5
 
 #
 # **Swerve Module CanCoder Config
