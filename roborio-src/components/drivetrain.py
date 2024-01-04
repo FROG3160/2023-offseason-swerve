@@ -137,6 +137,7 @@ class DriveUnit:
         """
         wheel_rotations_sec = speed / self.circumference
         motor_rotations_sec = self.gearing.toMotor(wheel_rotations_sec)
+        #ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/34 Phoenix6 conversion: Remove the additional calculations
         ticks_per_sec = motor_rotations_sec * self.cpr
         return ticks_per_sec / 10
 
@@ -147,6 +148,7 @@ class DriveUnit:
         Returns:
             float: system linear speed in meters per second
         """
+        #ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/35 Phoenix6 conversion: Calculate from motor rotations, not encoder ticks
         ticks_per_sec = velocity * 10
         motor_rotations_sec = ticks_per_sec / self.cpr
         wheel_rotations_sec = self.gearing.fromMotor(motor_rotations_sec)
