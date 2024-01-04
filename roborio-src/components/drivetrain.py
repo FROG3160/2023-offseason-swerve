@@ -125,7 +125,7 @@ class DriveUnit:
         """
         self.gearing = GearStages(gear_stages)
         self.motor_rpm = motor_rpm
-        #ISSUE: Phoenix6 conversion: make sure cpr is no longer needed, and remove
+        #ISSUE: https://github.com/FROG3160/2023-offseason-swerve/issues/36 Phoenix6 conversion: make sure cpr is no longer needed, and remove
         self.cpr = cpr
         self.circumference = math.pi * diameter
 
@@ -165,7 +165,7 @@ class DriveUnit:
         Returns:
             float: distance in meters
         """
-        #ISSUE Phoenix6 conversion: change input parameter to motor rps
+        #ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/37 Phoenix6 conversion: change input parameter to motor rps
         motor_rotations = position / self.cpr
         wheel_rotations = self.gearing.fromMotor(motor_rotations)
         return wheel_rotations * self.circumference
