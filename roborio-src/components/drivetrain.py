@@ -381,6 +381,7 @@ class SwerveChassis:
     logger: Logger
 
     fieldLayout: FROGFieldLayout
+    #ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/38 Add FROGLimeLightVision from last year's code
     limelight: FROGLimeLightVision
 
     gyro: FROGGyro
