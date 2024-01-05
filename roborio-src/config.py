@@ -132,7 +132,7 @@ class SwerveSteerMotorConfig(TalonFXConfiguration):
     def __init__(self):
         super.__init__()
 
-
+#ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/39 Refactor SwerveModuleConfig to take motor and encoder configs
 class SwerveModuleConfig:
     def __init__(self,
                  name: str,
