@@ -3,19 +3,13 @@ from wpimath.geometry import Translation2d, Translation3d, Transform3d, Rotation
 from wpimath.units import feetToMeters, metersToInches, degreesToRadians, inchesToMeters
 from wpimath.controller import PIDController, ProfiledPIDControllerRadians
 from wpimath.trajectory import TrapezoidProfileRadians
-from ctre import (
-    TalonFXConfiguration,
-    SensorInitializationStrategy,
-    BaseTalonPIDSetConfiguration,
-    FeedbackDevice,
-    CANCoderConfiguration,
-    AbsoluteSensorRange,
-)
 from phoenix6 import (TalonFX, CANcoder, TalonFXConfiguration,
                       CANcoderConfiguration,
                       PositionDutyCycle, VelocityDutyCycle)
-from phoenix6.configs.cancoder_configs import AbsoluteSensorRangeValue, SensorDirectionValue
+from phoenix6.configs.cancoder_configs import (AbsoluteSensorRangeValue, SensorDirectionValue, CANcoderConfiguration,
+                                               AbsoluteSensorRange)
 from phoenix6.configs.talon_fx_configs import FeedbackSensorSourceValue
+from phoenix6.configs.config_groups import MagnetSensorConfigs
 
 TRACK_WIDTH = 20 / 12
 WHEELBASE = 20 / 12
@@ -79,25 +73,25 @@ brDriveMotorConfig = FROGFXMotorConfig(
 #
 frSteerMotorConfig = FROGFXMotorConfig(
     feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
-    feedback_remote_sensor_id=31
+    feedback_remote_sensor_id=31,
     k_p=1.2,
     k_i=0.0001
 )
 flSteerMotorConfig = FROGFXMotorConfig(
     feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
-    feedback_remote_sensor_id=32
+    feedback_remote_sensor_id=32,
     k_p=1.2,
     k_i=0.0001
 )
 blSteerMotorConfig = FROGFXMotorConfig(
     feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
-    feedback_remote_sensor_id=33
+    feedback_remote_sensor_id=33,
     k_p=1.2,
     k_i=0.0001
 )
 brSteerMotorConfig = FROGFXMotorConfig(
     feedback_sensor_source=FeedbackSensorSourceValue.REMOTE_CANCODER,
-    feedback_remote_sensor_id=34
+    feedback_remote_sensor_id=34,
     k_p=1.2,
     k_i=0.0001
 )
@@ -184,43 +178,48 @@ MODULE_FRONT_LEFT = SwerveModuleConfig(
     0.0455
     )
 
-MODULE_FRONT_LEFT = {
-    "name": "FrontLeft",
-    "drive_motor_id": 11,
-    "steer_motor_id": 21,
-    "steer_sensor_id": 31,
-    "steer_sensor_offset": -5.625,
-    "location": Translation2d.fromFeet(WHEELBASE / 2, TRACK_WIDTH / 2),
-    .drive_motor_config": flDriveMotorPID
-}
+MODULE_FRONT_RIGHT = SwerveModuleConfig(
+    "FrontRight",
+    12,
+    22,
+    32,
+    -150.293,
+    WHEELBASE / 2,
+    -TRACK_WIDTH / 2,
+    0,
+    0,
+    0,
+    0.04425
+)
 
-MODULE_FRONT_RIGHT = {
-    "name": "FrontRight",
-    "drive_motor_id": 12,
-    "steer_motor_id": 22,
-    "steer_sensor_id": 32,
-    "steer_sensor_offset": -150.293,
-    "location": Translation2d.fromFeet(WHEELBASE / 2, -TRACK_WIDTH / 2),
-    .drive_motor_config": frDriveMotorPID
-}
-MODULE_BACK_LEFT = {
-    "name": "BackLeft",
-    "drive_motor_id": 13,
-    "steer_sensor_id": 33,
-    "steer_motor_id": 23,
-    "steer_sensor_offset": 179.825,
-    "location": Translation2d.fromFeet(-WHEELBASE / 2, TRACK_WIDTH / 2),
-    .drive_motor_config": blDriveMotorPID
-}
-MODULE_BACK_RIGHT = {
-    "name": "BackRight",
-    "drive_motor_id": 14,
-    "steer_motor_id": 24,
-    "steer_sensor_id": 34,
-    "steer_sensor_offset": 46.230,
-    "location": Translation2d.fromFeet(-WHEELBASE / 2, -TRACK_WIDTH / 2),
-    .drive_motor_config": brDriveMotorPID
-}
+MODULE_BACK_LEFT = SwerveModuleConfig(
+    "BackLeft",
+    13,
+    23,
+    33,
+    179.825,
+    -WHEELBASE / 2, 
+    TRACK_WIDTH / 2,
+    0,
+    0,
+    0,
+    0.0439
+)
+    
+MODULE_BACK_RIGHT = SwerveModuleConfig(
+    "BackRight",
+    14,
+    24,
+    34,
+    46.230,
+    -WHEELBASE / 2,
+    -TRACK_WIDTH / 2,
+    0,
+    0,
+    0,
+    0.0438
+)
+
 
 MAX_TRAJECTORY_SPEED = 3
 MAX_TRAJECTORY_ACCEL = 3
@@ -233,12 +232,9 @@ ppTolerance = Pose2d(0.03, 0.03, Rotation2d.fromDegrees(2))
 #
 # **Swerve Module CanCoder Config
 #
-cfgSteerEncoder = CANCoderConfiguration()
-cfgSteerEncoder.sensorDirection = False  # CCW spin of magnet is positive
-cfgSteerEncoder.initializationStrategy = (
-    SensorInitializationStrategy.BootToAbsolutePosition
-)
-cfgSteerEncoder.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180
+cfgSteerEncoder = CANcoderConfiguration().with_magnet_sensor(MagnetSensorConfigs().with_magnet_offset())
+cfgSteerEncoder.magnet_sensor.with_sensor_direction(SensorDirectionValue.COUNTER_CLOCKWISE_POSITIVE)
+cfgSteerEncoder.magnet_sensor.with_absolute_sensor_range(AbsoluteSensorRangeValue.SIGNED_PLUS_MINUS_HALF)
 
 cfgProfiledMaxVelocity = math.pi*8
 cfgProfiledMaxAccel = math.pi*4
