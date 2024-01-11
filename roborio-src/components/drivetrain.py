@@ -114,19 +114,14 @@ class GearStages:
 
 
 class DriveUnit:
-    def __init__(self, gear_stages: list, motor_rpm: int, diameter: float, cpr: int):
+    def __init__(self, gear_stages: list, diameter: float):
         """Constructs a DriveUnit object that stores data about the motor, gear stages, and wheel
            that makes up a complete power train.
         Args:
             gear_stages (list): list of gear stages expressed as tuples of two integers e.g. [(10, 32), (9, 24)]
-            motor_rpm (int): Maximum rpm of the attached motor
             diameter (float): Diameter of the attached wheel in meters
-            cpr (int): Number of encoder counts per revolution
         """
         self.gearing = GearStages(gear_stages)
-        self.motor_rpm = motor_rpm
-        #ISSUE: https://github.com/FROG3160/2023-offseason-swerve/issues/36 Phoenix6 conversion: make sure cpr is no longer needed, and remove
-        self.cpr = cpr
         self.circumference = math.pi * diameter
 
     def speedToVelocity(self, speed: float) -> float:
@@ -134,15 +129,13 @@ class DriveUnit:
         Args:
             speed (float): desired linear speed in meters per second
         Returns:
-            float: motor velocity in encoder counts per 100ms
+            float: motor rotations per second
         """
         wheel_rotations_sec = speed / self.circumference
         motor_rotations_sec = self.gearing.toMotor(wheel_rotations_sec)
-        #ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/34 Phoenix6 conversion: Remove the additional calculations
-        ticks_per_sec = motor_rotations_sec * self.cpr
-        return ticks_per_sec / 10
+        return motor_rotations_sec
 
-    def velocityToSpeed(self, velocity: float) -> float:
+    def velocityToSpeed(self, rotations_per_sec: float) -> float:
         """Converts motor velocity to the system linear speed
         
         Args:
@@ -150,13 +143,10 @@ class DriveUnit:
         Returns:
             float: system linear speed in meters per second
         """
-        #ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/35 Phoenix6 conversion: Calculate from motor rotations, not encoder ticks
-        ticks_per_sec = velocity * 10
-        motor_rotations_sec = ticks_per_sec / self.cpr
-        wheel_rotations_sec = self.gearing.fromMotor(motor_rotations_sec)
+        wheel_rotations_sec = self.gearing.fromMotor(rotations_per_sec)
         return wheel_rotations_sec * self.circumference
 
-    def positionToDistance(self, position: int) -> float:
+    def positionToDistance(self, rotations: float) -> float:
         """Takes encoder count and returns distance
 
         Args:
@@ -165,9 +155,7 @@ class DriveUnit:
         Returns:
             float: distance in meters
         """
-        #ISSUE https://github.com/FROG3160/2023-offseason-swerve/issues/37 Phoenix6 conversion: change input parameter to motor rps
-        motor_rotations = position / self.cpr
-        wheel_rotations = self.gearing.fromMotor(motor_rotations)
+        wheel_rotations = self.gearing.fromMotor(rotations)
         return wheel_rotations * self.circumference
 
 
