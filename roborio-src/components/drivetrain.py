@@ -253,9 +253,6 @@ class SwerveModule:
             self.getCurrentDistance(), self.getCurrentRotation()
         )
 
-    def getSteerPosition(self):
-        return self.steer.getSelectedSensorPosition(0)
-
     def configModuleComponents(self):
         # configure CANCoder
         cancoder_config = CANcoderConfiguration()
