@@ -30,69 +30,6 @@ MAX_TRAJECTORY_SPEED = feetToMeters(5)
 MAX_TRAJECTORY_ACCEL = feetToMeters(5)
 
 
-# TODO: move this function to utils.  We can use it for other systems.
-def constrain_radians(rads):
-    """Returns radians between -2*pi and 2*pi
-    Args:
-        rads (float): angle in radians"""
-    return math.atan2(math.sin(rads), math.cos(rads))
-
-
-class FROGSwerveModuleState(SwerveModuleState):
-    """Extends SwerveModuleState with method to optimize
-    the steering angle
-
-    """
-    def optimize(self, current_steer_position):
-        # def optimize_steer_angle(new_state: SwerveModuleState, current_radians):
-        """This function takes the desired module state and the current
-        angle of the wheel and calculates a new position that keeps the
-        amount of rotation needed to under 90 degrees in either direction.
-        Args:
-            new_state (SwerveModuleState): the module state
-            current_steer_position (float): current angle in radians.
-                This value does not have to be between -pi and pi.
-        Returns:
-            SwerveModuleState
-
-        """
-        invert_speed = 1
-
-        # all angles are in radians
-        desired_angle = self.angle.radians()
-
-        # get current angle by getting the steer position in encoder ticks
-        # and dividing it by the ticks per radian of the encoder
-        current_angle = constrain_radians(current_steer_position / config.CANCODER_TICKS_PER_RADIAN)
-
-        n_offset = desired_angle - current_angle
-
-        # if our offset is greater than 90 degrees (pi/2 radians), we need to 
-        # flip 180 and reverse speed.
-        # TODO:  Add code to check/monitor how many times we go through this while
-        #   loop.  This may be a cause for teleop loop overruns.  The while loop
-        #   was originally implemented because sometimes the first calculation
-        #   would still give us an angle larger than 90 degrees.  We may want to
-        #   find a way to determine how much of a change needs to be made before we
-        #   run the calculations in the while loop.
-        while abs(n_offset) > math.pi / 2:
-            if n_offset < -math.pi / 2:
-                n_offset += math.pi
-                invert_speed *= -1
-            elif n_offset > math.pi / 2:
-                n_offset -= math.pi
-                invert_speed *= -1
-        new_angle = constrain_radians(current_angle + n_offset)
-
-        if abs(n_offset) > math.pi / 2:
-            print(">>>>>>>>>>>>>>>>>ERROR<<<<<<<<<<<<<<<<<<<<")
-        
-        self.invert_speed = invert_speed
-        self.position_offset = n_offset
-        # sets the new angle of the Swerve Module State
-        self.angle = Rotation2d(new_angle)
-
-
 class GearStages:
     def __init__(self, gear_stages: list):
         """
@@ -299,34 +236,20 @@ class SwerveModule:
     def disableMinSpeed(self):
         self.useMinSpeed = False
 
-    def setState(self, state: SwerveModuleState):
-        # TODO: Remove the following config change once tuning is done
-        self.requestedState = FROGSwerveModuleState(state.speed, state.angle)
-        
+    def setState(self, requested_state: SwerveModuleState):
         if self.enabled:
             #
             # using built-in optimize method instead of our custom one from last year
-            current_steer_position = self.getSteerPosition()
-            self.requestedState.optimize(current_steer_position)
-            # self.periodic()
+            self.requestedState = SwerveModuleState.optimize(requested_state, self.getCurrentRotation())
 
             self.steer.set(
                 POSITION_MODE,
-                current_steer_position
-                + (self.requestedState.position_offset * config.CANCODER_TICKS_PER_RADIAN),
+                requested_state.angle * config.CANCODER_TICKS_PER_RADIAN
             )
 
-            # constrain speed within min and max speeds
-            if self.useMinSpeed:
-                driveSpeed = math.copysign(
-                    remap(abs(self.requestedState.speed), 0, config.MAX_METERS_PER_SEC, config.MIN_METERS_PER_SEC, config.MAX_METERS_PER_SEC),
-                    self.requestedState.speed
-                )
-            else:
-                driveSpeed = self.requestedState.speed
             self.drive.set(
                 VELOCITY_MODE,
-                self.drive_unit.speedToVelocity(driveSpeed * self.requestedState.invert_speed),
+                self.drive_unit.speedToVelocity(self.requestedState.speed),
             )
         else:
             self.drive.set(0)
@@ -389,10 +312,10 @@ class SwerveChassis:
         )
 
         self.moduleStates = (
-            FROGSwerveModuleState(),
-            FROGSwerveModuleState(),
-            FROGSwerveModuleState(),
-            FROGSwerveModuleState(),
+            SwerveModuleState(),
+            SwerveModuleState(),
+            SwerveModuleState(),
+            SwerveModuleState(),
         )
         self.current_speeds = ChassisSpeeds(0, 0, 0)
 
